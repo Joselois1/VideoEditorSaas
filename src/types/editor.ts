@@ -27,7 +27,12 @@ export interface LoopSettings       { count: number }
 export interface ExtractFrameSettings { time: number }
 export interface GifSettings        { startTime: number; endTime: number; fps: number; width: number }
 export interface FpsSettings        { fps: number }
-export interface JoinSettings       { additionalFiles: File[] }
+export interface JoinClip {
+  file: File;
+  isImage: boolean;
+  duration: number; // segundos que se muestra (solo para imagenes)
+}
+export interface JoinSettings       { clips: JoinClip[] }
 export interface TextSettings       {
   text: string;
   fontSize: number;

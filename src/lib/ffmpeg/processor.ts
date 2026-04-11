@@ -155,24 +155,45 @@ export async function processVideo(
         break;
 
       case "join": {
-        // Write each additional file to virtual FS and build concat list
-        const allFiles = [state.video.file, ...join.additionalFiles];
-        const concatLines: string[] = [];
+        outputExt = "mp4";
+        const targetW = state.video.width;
+        const targetH = state.video.height;
 
-        for (let idx = 0; idx < allFiles.length; idx++) {
-          const file = allFiles[idx];
-          const fileExt = file.name.split(".").pop() ?? "mp4";
-          const name = `join_${idx}.${fileExt}`;
-          await ffmpeg.writeFile(name, await fetchFile(file));
+        // Build the full list: original video first, then additional clips
+        const allClips = [
+          { file: state.video.file, isImage: false, duration: 0 },
+          ...join.clips,
+        ];
+
+        // Build input args: images need -loop 1 -t <duration> before -i
+        const inputArgs: string[] = [];
+        for (const clip of allClips) {
+          const clipExt = clip.file.name.split(".").pop() ?? "mp4";
+          const name = `join_${inputArgs.length / (clip.isImage ? 4 : 2)}.${clipExt}`;
+          await ffmpeg.writeFile(name, await fetchFile(clip.file));
           filesToClean.push(name);
-          concatLines.push(`file '${name}'`);
+          if (clip.isImage) {
+            inputArgs.push("-loop", "1", "-t", String(clip.duration), "-i", name);
+          } else {
+            inputArgs.push("-i", name);
+          }
         }
 
-        const concatContent = concatLines.join("\n");
-        const encoder = new TextEncoder();
-        await ffmpeg.writeFile("concat.txt", encoder.encode(concatContent));
-        filesToClean.push("concat.txt");
-        await ffmpeg.exec(buildJoinArgs("concat.txt", `output.${outputExt}`));
+        // Normalize every stream to same resolution + fps, then concat
+        const scaleFilter = `scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease,pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2,fps=30,setsar=1`;
+        const filterParts = allClips.map((_, i) => `[${i}:v]${scaleFilter}[v${i}]`);
+        const concatSrc = allClips.map((_, i) => `[v${i}]`).join("");
+        filterParts.push(`${concatSrc}concat=n=${allClips.length}:v=1:a=0[v]`);
+
+        await ffmpeg.exec([
+          ...inputArgs,
+          "-filter_complex", filterParts.join(";"),
+          "-map", "[v]",
+          "-c:v", "libx264",
+          "-preset", "ultrafast",
+          "-an",
+          `output.${outputExt}`,
+        ]);
         break;
       }
 

@@ -23,7 +23,7 @@ const initialState: EditorState = {
   extractFrame: { time: 0 },
   gif:          { startTime: 0, endTime: 5, fps: 10, width: 480 },
   fps:          { fps: 30 },
-  join:         { additionalFiles: [] },
+  join:         { clips: [] },
   text:         { text: "", fontSize: 36, color: "white", position: "bottom-center", startTime: 0, endTime: 0 },
   noise:        { strength: 25 },
 
@@ -118,8 +118,8 @@ export function useVideoEditor() {
   const updateFps     = useCallback((fps: number) =>
     setState((p) => ({ ...p, fps: { fps } })), []);
 
-  const updateJoin    = useCallback((additionalFiles: File[]) =>
-    setState((p) => ({ ...p, join: { additionalFiles } })), []);
+  const updateJoin    = useCallback((clips: EditorState["join"]["clips"]) =>
+    setState((p) => ({ ...p, join: { clips } })), []);
 
   const updateText    = useCallback((text: Partial<EditorState["text"]>) =>
     setState((p) => ({ ...p, text: { ...p.text, ...text } })), []);

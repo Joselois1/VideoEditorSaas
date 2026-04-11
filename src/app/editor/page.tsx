@@ -31,7 +31,7 @@ import { useFFmpeg } from "@/hooks/useFFmpeg";
 import { useVideoEditor } from "@/hooks/useVideoEditor";
 import { processVideo } from "@/lib/ffmpeg/processor";
 import { generateOutputFilename } from "@/lib/utils";
-import type { ToolType } from "@/types/editor";
+import type { ToolType, JoinClip } from "@/types/editor";
 
 const OUTPUT_SUFFIX: Record<ToolType, string> = {
   trim: "trimmed", speed: "speed", crop: "cropped", audio: "audio",
@@ -54,15 +54,25 @@ export default function EditorPage() {
 
   const [showAd, setShowAd] = useState(false);
 
-  const handleFileSelected = useCallback(async (file: File) => {
-    await loadVideo(file);
+  const handleFilesSelected = useCallback(async (files: File[]) => {
+    await loadVideo(files[0]);
     if (!isReady && !isLoading) load();
-  }, [loadVideo, isReady, isLoading, load]);
+    if (files.length > 1) {
+      const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+      const clips: JoinClip[] = files.slice(1).map((f) => ({
+        file: f,
+        isImage: IMAGE_TYPES.has(f.type),
+        duration: 3,
+      }));
+      updateJoin(clips);
+      setActiveTool("join");
+    }
+  }, [loadVideo, isReady, isLoading, load, updateJoin, setActiveTool]);
 
   // Procesar directo — sin anuncio, solo genera el preview
   const handleProcess = async () => {
     if (!ffmpeg || !state.video || !state.activeTool) return;
-    if (state.activeTool === "join" && state.join.additionalFiles.length === 0) {
+    if (state.activeTool === "join" && state.join.clips.length === 0) {
       setError("Agrega al menos un clip para unir.");
       return;
     }
@@ -120,7 +130,7 @@ export default function EditorPage() {
       case "extract-frame": return <ExtractFramePanel settings={state.extractFrame} onChange={updateExtractFrame} duration={video.duration} />;
       case "gif":           return <GifPanel settings={state.gif} onChange={updateGif} duration={video.duration} />;
       case "fps":           return <FpsPanel settings={state.fps} onChange={updateFps} />;
-      case "join":          return <JoinPanel originalName={video.name} additionalFiles={state.join.additionalFiles} onChange={updateJoin} />;
+      case "join":          return <JoinPanel originalName={video.name} clips={state.join.clips} onChange={updateJoin} />;
       case "text":          return <TextPanel settings={state.text} onChange={updateText} duration={video.duration} />;
       case "noise":         return <NoisePanel settings={state.noise} onChange={updateNoise} />;
       default:              return null;
@@ -132,7 +142,7 @@ export default function EditorPage() {
       <Header />
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
         {!state.video ? (
-          <VideoUploader onFileSelected={handleFileSelected} />
+          <VideoUploader onFilesSelected={handleFilesSelected} />
         ) : (
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4 flex-wrap">

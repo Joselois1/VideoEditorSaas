@@ -1,50 +1,59 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { formatFileSize } from "@/lib/utils";
 
-const ACCEPTED = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo", "video/mpeg"];
+const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo", "video/mpeg"];
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALL_ACCEPTED = [...VIDEO_TYPES, ...IMAGE_TYPES];
 const MAX_SIZE_MB = 500;
 
 interface VideoUploaderProps {
-  onFileSelected: (file: File) => void;
+  onFilesSelected: (files: File[]) => void;
 }
 
-export default function VideoUploader({ onFileSelected }: VideoUploaderProps) {
+export default function VideoUploader({ onFilesSelected }: VideoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validate = (file: File): string | null => {
-    if (!ACCEPTED.includes(file.type)) return "Formato no soportado. Usa MP4, WebM, MOV o AVI.";
-    if (file.size > MAX_SIZE_MB * 1024 * 1024)
-      return `El archivo supera el limite de ${MAX_SIZE_MB} MB.`;
+  const validate = (files: File[]): string | null => {
+    if (files.length === 0) return "No se seleccionaron archivos.";
+    const first = files[0];
+    if (!VIDEO_TYPES.includes(first.type))
+      return "El primer archivo debe ser un video (MP4, WebM, MOV o AVI).";
+    for (const f of files) {
+      if (!ALL_ACCEPTED.includes(f.type))
+        return `Formato no soportado: ${f.name}`;
+      if (f.size > MAX_SIZE_MB * 1024 * 1024)
+        return `"${f.name}" supera el limite de ${MAX_SIZE_MB} MB.`;
+    }
     return null;
   };
 
-  const handleFile = useCallback(
-    (file: File) => {
-      const err = validate(file);
+  const handleFiles = useCallback(
+    (files: File[]) => {
+      const err = validate(files);
       if (err) { setError(err); return; }
       setError(null);
-      onFileSelected(file);
+      onFilesSelected(files);
     },
-    [onFileSelected]
+    [onFilesSelected]
   );
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       setDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length) handleFiles(files);
     },
-    [handleFile]
+    [handleFiles]
   );
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    const files = Array.from(e.target.files ?? []);
+    if (files.length) handleFiles(files);
+    e.target.value = "";
   };
 
   return (
@@ -71,18 +80,21 @@ export default function VideoUploader({ onFileSelected }: VideoUploaderProps) {
 
         <div className="text-center">
           <p className="text-lg font-semibold text-white">
-            {dragging ? "Suelta el video aqui" : "Arrastra tu video aqui"}
+            {dragging ? "Suelta los archivos aqui" : "Arrastra tus archivos aqui"}
           </p>
           <p className="text-zinc-400 text-sm mt-1">
-            o haz clic para seleccionarlo
+            Un video para editar, o varios para unirlos
+          </p>
+          <p className="text-zinc-600 text-xs mt-1">
+            o haz clic para seleccionarlos
           </p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-2 text-xs text-zinc-500">
-          {["MP4", "WebM", "MOV", "AVI"].map((f) => (
+          {["MP4", "WebM", "MOV", "AVI", "JPG", "PNG"].map((f) => (
             <span key={f} className="px-2 py-0.5 bg-zinc-800 rounded-full">{f}</span>
           ))}
-          <span className="px-2 py-0.5 bg-zinc-800 rounded-full">Max {MAX_SIZE_MB} MB</span>
+          <span className="px-2 py-0.5 bg-zinc-800 rounded-full">Max {MAX_SIZE_MB} MB c/u</span>
         </div>
       </div>
 
@@ -95,7 +107,8 @@ export default function VideoUploader({ onFileSelected }: VideoUploaderProps) {
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPTED.join(",")}
+        multiple
+        accept={ALL_ACCEPTED.join(",")}
         className="hidden"
         onChange={onInputChange}
       />
