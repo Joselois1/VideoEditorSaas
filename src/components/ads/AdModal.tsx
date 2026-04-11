@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AdBanner from "./AdBanner";
 
 interface AdModalProps {
   onComplete: () => void;
@@ -38,18 +39,9 @@ export default function AdModal({ onComplete, onClose }: AdModalProps) {
           </span>
         </div>
 
-        {/* Espacio del anuncio — aqui va Google AdSense */}
-        <div className="h-64 flex items-center justify-center bg-zinc-950 text-zinc-600 text-sm">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-full border-2 border-zinc-700 flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                  d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-              </svg>
-            </div>
-            <p>Espacio publicitario</p>
-            <p className="text-xs mt-1">Google AdSense</p>
-          </div>
+        {/* Anuncio Google AdSense */}
+        <div className="min-h-64 bg-zinc-950 flex items-center justify-center">
+          <AdBanner className="w-full" />
         </div>
 
         <div className="px-5 py-4 flex items-center justify-between gap-4">
