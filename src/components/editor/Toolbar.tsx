@@ -2,50 +2,50 @@
 
 import type { ToolType } from "@/types/editor";
 
-interface Tool { id: ToolType; label: string; icon: string }
+interface Tool { id: ToolType; label: string }
 
 const GROUPS: { label: string; tools: Tool[] }[] = [
   {
     label: "Video",
     tools: [
-      { id: "trim",         label: "Cortar",    icon: "✂️" },
-      { id: "speed",        label: "Velocidad", icon: "⚡" },
-      { id: "rotate",       label: "Rotar",     icon: "🔄" },
-      { id: "reverse",      label: "Invertir",  icon: "⏪" },
-      { id: "loop",         label: "Loop",      icon: "🔁" },
-      { id: "fps",          label: "FPS",       icon: "🎞️" },
+      { id: "trim",          label: "Cortar"    },
+      { id: "speed",         label: "Velocidad" },
+      { id: "rotate",        label: "Rotar"     },
+      { id: "reverse",       label: "Invertir"  },
+      { id: "loop",          label: "Loop"      },
+      { id: "fps",           label: "FPS"       },
     ],
   },
   {
     label: "Audio",
     tools: [
-      { id: "audio",        label: "Audio",     icon: "🎵" },
-      { id: "volume",       label: "Volumen",   icon: "🔊" },
-      { id: "noise",        label: "Ruido",     icon: "🎙️" },
+      { id: "audio",         label: "Audio"    },
+      { id: "volume",        label: "Volumen"  },
+      { id: "noise",         label: "Ruido"    },
     ],
   },
   {
     label: "Visual",
     tools: [
-      { id: "crop",         label: "Recortar",  icon: "⬛" },
-      { id: "color",        label: "Color",     icon: "🎨" },
-      { id: "fade",         label: "Fade",      icon: "🌅" },
-      { id: "text",         label: "Texto",     icon: "T" },
+      { id: "crop",          label: "Recortar" },
+      { id: "color",         label: "Color"    },
+      { id: "fade",          label: "Fade"     },
+      { id: "text",          label: "Texto"    },
     ],
   },
   {
     label: "Exportar",
     tools: [
-      { id: "compress",     label: "Comprimir", icon: "📦" },
-      { id: "format",       label: "Formato",   icon: "🔀" },
-      { id: "gif",          label: "GIF",       icon: "🖼️" },
-      { id: "extract-frame",label: "Captura",   icon: "📷" },
+      { id: "compress",      label: "Comprimir" },
+      { id: "format",        label: "Formato"   },
+      { id: "gif",           label: "GIF"       },
+      { id: "extract-frame", label: "Captura"   },
     ],
   },
   {
     label: "Combinar",
     tools: [
-      { id: "join",         label: "Unir",      icon: "➕" },
+      { id: "join", label: "Unir" },
     ],
   },
 ];
@@ -69,13 +69,12 @@ export default function Toolbar({ activeTool, onToolSelect }: ToolbarProps) {
                 key={tool.id}
                 onClick={() => onToolSelect(tool.id)}
                 className={`
-                  flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all
+                  px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all
                   ${activeTool === tool.id
                     ? "bg-violet-600 text-white shadow-md shadow-violet-900/40"
                     : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"}
                 `}
               >
-                <span className="text-sm leading-none">{tool.icon}</span>
                 {tool.label}
               </button>
             ))}
