@@ -8,13 +8,15 @@ import type {
 const CRF_MAP = { low: "28", medium: "23", high: "18" } as const;
 
 const TEXT_POSITION: Record<string, { x: string; y: string }> = {
-  "top-left":      { x: "10",                y: "10" },
-  "top-center":    { x: "(w-text_w)/2",       y: "10" },
-  "top-right":     { x: "w-text_w-10",        y: "10" },
-  "center":        { x: "(w-text_w)/2",       y: "(h-text_h)/2" },
-  "bottom-left":   { x: "10",                y: "h-text_h-10" },
-  "bottom-center": { x: "(w-text_w)/2",       y: "h-text_h-10" },
-  "bottom-right":  { x: "w-text_w-10",        y: "h-text_h-10" },
+  "top-left":      { x: "10",             y: "10" },
+  "top-center":    { x: "(w-text_w)/2",   y: "10" },
+  "top-right":     { x: "w-text_w-10",    y: "10" },
+  "center-left":   { x: "10",             y: "(h-text_h)/2" },
+  "center":        { x: "(w-text_w)/2",   y: "(h-text_h)/2" },
+  "center-right":  { x: "w-text_w-10",    y: "(h-text_h)/2" },
+  "bottom-left":   { x: "10",             y: "h-text_h-10" },
+  "bottom-center": { x: "(w-text_w)/2",   y: "h-text_h-10" },
+  "bottom-right":  { x: "w-text_w-10",    y: "h-text_h-10" },
 };
 
 // ─── Existing tools ───────────────────────────────────────────────────────────

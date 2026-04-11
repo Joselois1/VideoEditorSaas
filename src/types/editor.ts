@@ -6,8 +6,8 @@ export type ToolType =
 export type VideoFormat = "mp4" | "webm" | "mov" | "avi";
 export type SpeedValue = 0.25 | 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2;
 export type TextPosition =
-  | "top-left" | "top-center" | "top-right"
-  | "center"
+  | "top-left"    | "top-center"    | "top-right"
+  | "center-left" | "center"        | "center-right"
   | "bottom-left" | "bottom-center" | "bottom-right";
 
 // ─── Tool settings ────────────────────────────────────────────────────────────
