@@ -4,8 +4,11 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-zinc-500 text-sm">
         <p>
           &copy; {new Date().getFullYear()}{" "}
-          <span className="text-white font-medium">
-            clip<span className="text-violet-500">cut</span>
+          <span className="font-semibold">
+            <span className="text-white">clip</span>
+            <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 bg-clip-text text-transparent">
+              cut
+            </span>
           </span>
           . Todos los derechos reservados.
         </p>

@@ -3,8 +3,7 @@ import { Geist } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-// Reemplaza con tu Publisher ID de Google AdSense
-const PUBLISHER_ID = "ca-pub-XXXXXXXXXXXXXXXX";
+const PUBLISHER_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
@@ -20,12 +19,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${geist.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-zinc-950 text-white">
         {children}
-        <Script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUBLISHER_ID}`}
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
+        {PUBLISHER_ID && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUBLISHER_ID}`}
+            crossOrigin="anonymous"
+            strategy="lazyOnload"
+          />
+        )}
       </body>
     </html>
   );

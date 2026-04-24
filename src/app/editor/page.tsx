@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import VideoUploader from "@/components/editor/VideoUploader";
@@ -142,12 +143,41 @@ export default function EditorPage() {
       <Header />
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
         {!state.video ? (
-          <VideoUploader onFilesSelected={handleFilesSelected} />
+          <div className="flex flex-col gap-4">
+            <VideoUploader onFilesSelected={handleFilesSelected} />
+            <div className="flex items-center justify-center">
+              <Link
+                href="/editor/proyecto"
+                className="group inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+              >
+                <span>¿Querés combinar varios clips con música?</span>
+                <span className="font-semibold bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 bg-clip-text text-transparent">
+                  Probá el modo Proyecto
+                </span>
+                <span className="transition-transform group-hover:translate-x-0.5">&rarr;</span>
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4 flex-wrap">
-              <h1 className="text-white font-semibold text-lg">Editor</h1>
-              <Button variant="ghost" size="sm" onClick={reset}>&larr; Cambiar video</Button>
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 h-8 rounded-full bg-gradient-to-b from-violet-500 via-fuchsia-500 to-orange-500" />
+                <div>
+                  <h1 className="text-white font-bold text-xl leading-tight">Editor</h1>
+                  <p className="text-xs text-zinc-500 truncate max-w-[240px] sm:max-w-md">
+                    {state.video.name}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/editor/proyecto">
+                  <Button variant="ghost" size="sm">
+                    Modo Proyecto &rarr;
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={reset}>&larr; Cambiar video</Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -184,20 +214,25 @@ export default function EditorPage() {
 
                 {/* Download bar — aparece cuando hay resultado */}
                 {state.outputUrl && (
-                  <div className="bg-zinc-900 border border-green-500/20 rounded-xl px-4 py-3 flex items-center justify-between gap-4">
-                    <p className="text-sm text-zinc-400">
-                      Revisa el resultado arriba y descargalo cuando estes listo.
-                    </p>
-                    <Button onClick={handleDownloadRequest} size="md">
-                      Descargar
-                    </Button>
+                  <div className="relative rounded-xl p-[1px] bg-gradient-to-r from-emerald-500/40 via-cyan-500/40 to-violet-500/40">
+                    <div className="bg-zinc-900 rounded-[11px] px-4 py-3 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px] shadow-emerald-400/60" />
+                        <p className="text-sm text-zinc-300">
+                          Listo &mdash; descargalo cuando quieras.
+                        </p>
+                      </div>
+                      <Button variant="gradient" onClick={handleDownloadRequest} size="md">
+                        Descargar
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* Tools column */}
               <div className="flex flex-col gap-4">
-                <div className="bg-zinc-900 border border-white/5 rounded-2xl p-4 flex flex-col gap-4 overflow-y-auto max-h-[80vh]">
+                <div className="bg-zinc-900/80 border border-white/5 rounded-2xl p-4 flex flex-col gap-4 overflow-y-auto max-h-[80vh] backdrop-blur-sm">
                   <Toolbar
                     activeTool={state.activeTool}
                     onToolSelect={(t: ToolType) => setActiveTool(t)}
@@ -211,6 +246,7 @@ export default function EditorPage() {
 
                   {state.activeTool && (
                     <Button
+                      variant="gradient"
                       className="w-full mt-2"
                       loading={state.isProcessing}
                       disabled={!isReady || state.isProcessing}

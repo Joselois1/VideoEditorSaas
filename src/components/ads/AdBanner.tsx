@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-// Reemplaza estos valores con los de tu cuenta Google AdSense
-const PUBLISHER_ID = "ca-pub-XXXXXXXXXXXXXXXX";
-const AD_SLOT      = "XXXXXXXXXX";
+const PUBLISHER_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+const AD_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT;
+const IS_CONFIGURED = Boolean(PUBLISHER_ID && AD_SLOT);
 
 declare global {
   interface Window {
@@ -20,7 +20,7 @@ export default function AdBanner({ className }: AdBannerProps) {
   const pushed = useRef(false);
 
   useEffect(() => {
-    if (pushed.current) return;
+    if (!IS_CONFIGURED || pushed.current) return;
     pushed.current = true;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -28,6 +28,21 @@ export default function AdBanner({ className }: AdBannerProps) {
       // AdSense no disponible (bloqueador, desarrollo local, etc.)
     }
   }, []);
+
+  if (!IS_CONFIGURED) {
+    return (
+      <div
+        className={`flex flex-col items-center justify-center gap-2 text-center px-6 py-10 bg-zinc-900/50 border border-dashed border-white/10 rounded-xl${className ? ` ${className}` : ""}`}
+      >
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+          Espacio publicitario
+        </span>
+        <p className="text-sm text-zinc-400 max-w-xs">
+          Gracias por apoyar clipcut &mdash; aqui apareceran anuncios cuando el sitio este aprobado.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <ins
