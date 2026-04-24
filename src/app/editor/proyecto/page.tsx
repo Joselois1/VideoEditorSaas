@@ -321,53 +321,75 @@ export default function ProjectEditorPage() {
               )}
             </section>
 
-            <AssetLibrary
-              assets={project.assets}
-              loading={loadingAssets}
-              onAddFiles={handleAddFiles}
-              onRemoveAsset={removeAsset}
-              onAddToTrack={handleAddToTrack}
-              onAddAsOverlay={(asset) => addOverlayClip(asset.id)}
-            />
+            {/* Zona editable — se bloquea visualmente durante el render */}
+            <div
+              className={`flex flex-col gap-5 transition-opacity ${
+                isRendering ? "opacity-50 pointer-events-none select-none" : ""
+              }`}
+              aria-disabled={isRendering}
+            >
+              {isRendering && (
+                <div className="flex items-center gap-2 bg-white/[0.03] border border-white/10 rounded-md px-3 py-2 text-xs text-zinc-400">
+                  <svg className="w-3.5 h-3.5 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span>Edición bloqueada durante el render. Los cambios van al próximo render.</span>
+                </div>
+              )}
 
-            {/* Timelines */}
-            <section className="bg-zinc-900/60 border border-white/5 rounded-xl p-4 flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-white">Timeline</h2>
-                <span className="text-xs text-zinc-500">
-                  Duración total: <span className="text-zinc-300 font-medium">{formatDuration(totalDuration)}</span>
-                </span>
-              </div>
-
-              <VideoTimeline
-                clips={project.videoTrack}
+              <AssetLibrary
                 assets={project.assets}
-                selectedClipId={project.selectedClipId}
-                totalDuration={totalDuration}
-                onReorder={reorderVideoTrack}
-                onSelect={selectClip}
-                onRemove={removeVideoClip}
+                loading={loadingAssets}
+                onAddFiles={handleAddFiles}
+                onRemoveAsset={removeAsset}
+                onAddToTrack={handleAddToTrack}
+                onAddAsOverlay={(asset) => addOverlayClip(asset.id)}
               />
 
-              <OverlayTimeline
-                clips={project.overlayTrack}
-                assets={project.assets}
-                selectedOverlayId={project.selectedOverlayId}
-                onSelect={selectOverlay}
-                onRemove={removeOverlayClip}
-              />
+              {/* Timelines */}
+              <section className="bg-zinc-900/60 border border-white/5 rounded-xl p-4 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-white">Timeline</h2>
+                  <span className="text-xs text-zinc-500">
+                    Duración total: <span className="text-zinc-300 font-medium">{formatDuration(totalDuration)}</span>
+                  </span>
+                </div>
 
-              <AudioTimeline
-                clips={project.audioTrack}
-                assets={project.assets}
-                onRemove={removeAudioClip}
-                onChangeVolume={(id, volume) => updateAudioClip(id, { volume })}
-              />
-            </section>
+                <VideoTimeline
+                  clips={project.videoTrack}
+                  assets={project.assets}
+                  selectedClipId={project.selectedClipId}
+                  totalDuration={totalDuration}
+                  onReorder={reorderVideoTrack}
+                  onSelect={selectClip}
+                  onRemove={removeVideoClip}
+                />
+
+                <OverlayTimeline
+                  clips={project.overlayTrack}
+                  assets={project.assets}
+                  selectedOverlayId={project.selectedOverlayId}
+                  onSelect={selectOverlay}
+                  onRemove={removeOverlayClip}
+                />
+
+                <AudioTimeline
+                  clips={project.audioTrack}
+                  assets={project.assets}
+                  onRemove={removeAudioClip}
+                  onChangeVolume={(id, volume) => updateAudioClip(id, { volume })}
+                />
+              </section>
+            </div>
           </div>
 
           {/* Panel lateral: efectos del elemento seleccionado + aspect presets */}
-          <aside className="flex flex-col gap-4 lg:sticky lg:top-16">
+          <aside
+            className={`flex flex-col gap-4 lg:sticky lg:top-16 transition-opacity ${
+              isRendering ? "opacity-50 pointer-events-none select-none" : ""
+            }`}
+            aria-disabled={isRendering}
+          >
             {selectedOverlay && selectedOverlayAsset ? (
               <OverlayEffectsPanel
                 clip={selectedOverlay}
