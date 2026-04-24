@@ -6,18 +6,25 @@ import type {
   Asset,
   VideoClip,
   AudioClip,
+  OverlayClip,
   ClipEffects,
   AspectPreset,
 } from "@/types/project";
-import { makeClipId } from "@/types/project";
+import {
+  makeClipId,
+  getTimelineDuration,
+  OVERLAY_DEFAULT_DURATION,
+} from "@/types/project";
 import { buildAsset } from "@/lib/project/assets";
 
 const initialProject: Project = {
   assets: [],
   videoTrack: [],
   audioTrack: [],
-  output: { aspect: "original", maxHeight: 1080 },
+  overlayTrack: [],
+  output: { aspect: "original", maxHeight: 720, previewMode: true },
   selectedClipId: null,
+  selectedOverlayId: null,
 };
 
 export function useProject() {
@@ -52,6 +59,7 @@ export function useProject() {
         assets: p.assets.filter((a) => a.id !== assetId),
         videoTrack: p.videoTrack.filter((c) => c.assetId !== assetId),
         audioTrack: p.audioTrack.filter((c) => c.assetId !== assetId),
+        overlayTrack: p.overlayTrack.filter((c) => c.assetId !== assetId),
       };
     });
   }, []);
@@ -122,9 +130,49 @@ export function useProject() {
     }));
   }, []);
 
-  // ── Selection ─────────────────────────────────────────────────────────────
+  // ── Overlay track ─────────────────────────────────────────────────────────
+  const addOverlayClip = useCallback((assetId: string) => {
+    setProject((p) => {
+      const asset = p.assets.find((a) => a.id === assetId);
+      if (!asset || asset.type !== "image") return p;
+      const totalDuration = getTimelineDuration(p);
+      const startAt = 0;
+      const endAt = Math.min(OVERLAY_DEFAULT_DURATION, totalDuration || OVERLAY_DEFAULT_DURATION);
+      const clip: OverlayClip = {
+        id: makeClipId(),
+        assetId,
+        startAt,
+        endAt,
+        position: "top-right",
+        size: "medium",
+        opacity: 1,
+      };
+      return { ...p, overlayTrack: [...p.overlayTrack, clip] };
+    });
+  }, []);
+
+  const removeOverlayClip = useCallback((clipId: string) => {
+    setProject((p) => ({
+      ...p,
+      overlayTrack: p.overlayTrack.filter((c) => c.id !== clipId),
+      selectedOverlayId: p.selectedOverlayId === clipId ? null : p.selectedOverlayId,
+    }));
+  }, []);
+
+  const updateOverlayClip = useCallback((clipId: string, patch: Partial<OverlayClip>) => {
+    setProject((p) => ({
+      ...p,
+      overlayTrack: p.overlayTrack.map((c) => (c.id === clipId ? { ...c, ...patch } : c)),
+    }));
+  }, []);
+
+  // ── Selection (mutex entre clip y overlay) ────────────────────────────────
   const selectClip = useCallback((clipId: string | null) => {
-    setProject((p) => ({ ...p, selectedClipId: clipId }));
+    setProject((p) => ({ ...p, selectedClipId: clipId, selectedOverlayId: null }));
+  }, []);
+
+  const selectOverlay = useCallback((overlayId: string | null) => {
+    setProject((p) => ({ ...p, selectedOverlayId: overlayId, selectedClipId: null }));
   }, []);
 
   // ── Output settings ───────────────────────────────────────────────────────
@@ -134,6 +182,10 @@ export function useProject() {
 
   const setMaxHeight = useCallback((maxHeight: number) => {
     setProject((p) => ({ ...p, output: { ...p.output, maxHeight } }));
+  }, []);
+
+  const setPreviewMode = useCallback((previewMode: boolean) => {
+    setProject((p) => ({ ...p, output: { ...p.output, previewMode } }));
   }, []);
 
   // ── Reset ─────────────────────────────────────────────────────────────────
@@ -157,9 +209,14 @@ export function useProject() {
     addAudioClip,
     removeAudioClip,
     updateAudioClip,
+    addOverlayClip,
+    removeOverlayClip,
+    updateOverlayClip,
     selectClip,
+    selectOverlay,
     setAspect,
     setMaxHeight,
+    setPreviewMode,
     reset,
   };
 }

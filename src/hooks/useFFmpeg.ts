@@ -34,5 +34,6 @@ export function useFFmpeg() {
     load,
     isReady: status === "ready",
     isLoading: status === "loading",
+    isError: status === "error",
   };
 }

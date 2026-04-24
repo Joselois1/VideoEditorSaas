@@ -11,16 +11,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-violet-600 hover:bg-violet-500 text-white disabled:bg-violet-900 disabled:text-violet-500 transition-colors",
+    "bg-violet-600 hover:bg-violet-500 text-white disabled:bg-violet-900 disabled:text-violet-500/60 transition-colors",
+  // "gradient" queda como alias de primary con un leve depth; mantiene la API.
   gradient:
-    "text-white bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 " +
-    "bg-[length:200%_100%] bg-left hover:bg-right shadow-lg shadow-fuchsia-900/40 " +
-    "hover:shadow-xl hover:shadow-fuchsia-700/40 disabled:opacity-50 disabled:shadow-none " +
-    "transition-all duration-500",
+    "bg-violet-600 hover:bg-violet-500 text-white shadow-sm shadow-violet-950/40 disabled:bg-violet-900 disabled:text-violet-500/60 disabled:shadow-none transition-colors",
   secondary:
-    "bg-zinc-700 hover:bg-zinc-600 text-white disabled:bg-zinc-800 disabled:text-zinc-600 transition-colors",
+    "bg-zinc-800 hover:bg-zinc-700 text-white border border-white/10 disabled:bg-zinc-900 disabled:text-zinc-600 transition-colors",
   ghost:
-    "bg-transparent hover:bg-white/10 text-zinc-300 hover:text-white transition-colors",
+    "bg-transparent hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-colors",
   danger:
     "bg-red-700 hover:bg-red-600 text-white transition-colors",
 };

@@ -16,6 +16,7 @@ interface AssetLibraryProps {
   onAddFiles: (files: File[]) => void;
   onRemoveAsset: (assetId: string) => void;
   onAddToTrack: (asset: Asset) => void;
+  onAddAsOverlay?: (asset: Asset) => void;
 }
 
 function typeBadge(type: Asset["type"]) {
@@ -37,6 +38,7 @@ export default function AssetLibrary({
   onAddFiles,
   onRemoveAsset,
   onAddToTrack,
+  onAddAsOverlay,
 }: AssetLibraryProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -80,17 +82,18 @@ export default function AssetLibrary({
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
           {assets.map((asset) => {
             const badge = typeBadge(asset.type);
-            const clickable = asset.type !== "audio" || true; // todos clickeables para agregar al track correspondiente
+            const isImage = asset.type === "image";
+            const showOverlayAction = isImage && !!onAddAsOverlay;
             return (
               <div
                 key={asset.id}
                 className="group relative bg-zinc-950 border border-white/5 rounded-xl overflow-hidden hover:border-fuchsia-500/40 transition-all"
               >
                 {/* Thumb */}
-                <button
-                  onClick={() => clickable && onAddToTrack(asset)}
-                  title={asset.type === "audio" ? "Agregar a pista de musica" : "Agregar al video"}
-                  className="w-full aspect-video relative bg-zinc-800 flex items-center justify-center"
+                <div
+                  className="w-full aspect-video relative bg-zinc-800 flex items-center justify-center cursor-pointer"
+                  onClick={() => onAddToTrack(asset)}
+                  title={asset.type === "audio" ? "Agregar a musica" : "Agregar al video"}
                 >
                   {asset.thumbnailUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -105,13 +108,25 @@ export default function AssetLibrary({
                     </svg>
                   )}
 
-                  {/* Overlay al hover con "+" */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 px-2.5 py-1 rounded-full">
-                      + Agregar
-                    </span>
+                  {/* Overlay al hover con accion(es) */}
+                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1.5 transition-opacity">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onAddToTrack(asset); }}
+                      className="text-[11px] font-semibold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 px-2.5 py-1 rounded-full transition-colors"
+                    >
+                      {asset.type === "audio" ? "+ A música" : "+ Al video"}
+                    </button>
+                    {showOverlayAction && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onAddAsOverlay!(asset); }}
+                        className="text-[11px] font-semibold text-white bg-gradient-to-r from-fuchsia-600 to-rose-500 hover:from-fuchsia-500 hover:to-rose-400 px-2.5 py-1 rounded-full transition-colors"
+                        title="Aparece sobre el video principal"
+                      >
+                        + Overlay
+                      </button>
+                    )}
                   </div>
-                </button>
+                </div>
 
                 {/* Info */}
                 <div className="p-2 flex flex-col gap-1">

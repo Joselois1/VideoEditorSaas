@@ -50,24 +50,49 @@ export interface AudioClip {
   fadeOut?: number;
 }
 
+// ─── Overlays (sobreimpresiones) ──────────────────────────────────────────────
+// Fotos que aparecen encima del video entre startAt y endAt de la timeline.
+
+export type OverlayPosition =
+  | "top-left"    | "top-center"    | "top-right"
+  | "center-left" | "center"        | "center-right"
+  | "bottom-left" | "bottom-center" | "bottom-right";
+
+export type OverlaySize = "small" | "medium" | "large";
+
+export interface OverlayClip {
+  id: string;
+  assetId: string;                             // debe ser tipo image
+  startAt: number;                             // en segundos, sobre la timeline
+  endAt: number;
+  position: OverlayPosition;
+  size: OverlaySize;                           // % del ancho del video final
+  opacity: number;                             // 0..1
+}
+
 export type AspectPreset = "original" | "9:16" | "16:9" | "1:1" | "4:5";
 
 export interface ProjectOutputSettings {
   aspect: AspectPreset;
   maxHeight: number;                           // 720, 1080, etc.
+  previewMode: boolean;                        // true: override a 480p + CRF alto (iteracion rapida)
 }
 
 export interface Project {
   assets: Asset[];                             // biblioteca
   videoTrack: VideoClip[];                     // orden secuencial, back-to-back
-  audioTrack: AudioClip[];                     // overlays sobre el video
+  audioTrack: AudioClip[];                     // pistas de musica
+  overlayTrack: OverlayClip[];                 // fotos sobre el video principal
   output: ProjectOutputSettings;
-  selectedClipId: string | null;               // para abrir panel de efectos
+  // Solo uno puede estar seleccionado a la vez — son mutex.
+  selectedClipId: string | null;
+  selectedOverlayId: string | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export const IMAGE_DEFAULT_DURATION = 3;       // segundos por defecto para imagenes
+export const OVERLAY_DEFAULT_DURATION = 3;     // segundos visible por defecto
 
 export function makeAssetId() {
   return `asset_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;

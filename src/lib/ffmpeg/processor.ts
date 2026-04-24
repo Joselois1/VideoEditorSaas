@@ -9,7 +9,9 @@ import {
   buildTextArgs, buildNoiseArgs, buildJoinArgs,
 } from "./commands";
 
-const FFMPEG_BASE_URL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
+// Multi-thread core: aprovecha varios cores del CPU via SharedArrayBuffer.
+// Requiere los headers COOP/COEP configurados en next.config.ts.
+const FFMPEG_BASE_URL = "https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/umd";
 const FONT_URL = "https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Regular.ttf";
 const FONT_PATH = "/tmp/font.ttf";
 
@@ -23,6 +25,7 @@ export async function loadFFmpeg(
   await ffmpeg.load({
     coreURL: await toBlobURL(`${FFMPEG_BASE_URL}/ffmpeg-core.js`, "text/javascript"),
     wasmURL: await toBlobURL(`${FFMPEG_BASE_URL}/ffmpeg-core.wasm`, "application/wasm"),
+    workerURL: await toBlobURL(`${FFMPEG_BASE_URL}/ffmpeg-core.worker.js`, "text/javascript"),
   });
 }
 
