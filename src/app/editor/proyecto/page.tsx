@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -33,9 +33,12 @@ export default function ProjectEditorPage() {
     setAspect, setMaxHeight, setPreviewMode,
   } = useProject();
 
-  const { ffmpeg, load, isReady, isLoading } = useFFmpeg();
+  const { ffmpeg, load, terminate, isReady, isLoading } = useFFmpeg();
   const renderAd = useAdGate();
   const downloadAd = useAdGate();
+
+  // Flag para distinguir "cancelado por el usuario" de un error real al abortar.
+  const cancelRequestedRef = useRef(false);
 
   const [isRendering, setIsRendering] = useState(false);
   const [renderProgress, setRenderProgress] = useState(0);
@@ -72,6 +75,7 @@ export default function ProjectEditorPage() {
   const doRender = useCallback(async () => {
     if (!ffmpeg) { setError("El motor de video no está listo."); return; }
     clearResult();
+    cancelRequestedRef.current = false;
     setIsRendering(true);
     setRenderProgress(0);
     setRenderStage("preparing");
@@ -107,14 +111,27 @@ export default function ProjectEditorPage() {
       setLastRenderMs(Date.now() - startedAt);
       setResult(r);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al renderizar el proyecto.");
+      if (cancelRequestedRef.current) {
+        // El usuario cancelo — no mostramos error, solo cerramos.
+        cancelRequestedRef.current = false;
+      } else {
+        setError(e instanceof Error ? e.message : "Error al renderizar el proyecto.");
+      }
     } finally {
       clearInterval(elapsedTimer);
-      ffmpeg.off("progress", onProgress);
+      try { ffmpeg.off("progress", onProgress); } catch { /* worker ya fue terminado */ }
       setIsRendering(false);
       setRenderEta(null);
     }
   }, [ffmpeg, project, setError, clearResult]);
+
+  const handleCancelRender = useCallback(() => {
+    if (!isRendering) return;
+    cancelRequestedRef.current = true;
+    terminate();     // mata el worker — ffmpeg.exec del doRender rechaza
+    // Recargamos FFmpeg en background para que el proximo render ya tenga motor listo.
+    load();
+  }, [isRendering, terminate, load]);
 
   const handleRenderClick = () => {
     if (project.videoTrack.length === 0) {
@@ -222,13 +239,19 @@ export default function ProjectEditorPage() {
               }
             />
             {isRendering && (
-              <div className="flex items-center justify-between text-[11px] text-zinc-500">
+              <div className="flex items-center justify-between text-[11px] text-zinc-500 gap-3">
                 <span>Transcurrido: {formatDuration(renderElapsed)}</span>
                 {renderEta !== null ? (
                   <span>Faltan aprox. {formatDuration(Math.round(renderEta))}</span>
                 ) : (
                   <span>Estimando tiempo...</span>
                 )}
+                <button
+                  onClick={handleCancelRender}
+                  className="ml-auto text-red-400 hover:text-red-300 font-medium transition-colors"
+                >
+                  Cancelar render
+                </button>
               </div>
             )}
           </div>

@@ -27,11 +27,23 @@ export function useFFmpeg() {
     }
   }, [ffmpeg, status]);
 
+  // Mata el worker actual. Despues de llamar esto, la instancia es invalida y
+  // hay que llamar load() de nuevo para poder ejecutar algo.
+  const terminate = useCallback(() => {
+    if (ffmpeg) {
+      try { ffmpeg.terminate(); } catch { /* ignore */ }
+    }
+    setFFmpeg(null);
+    setStatus("idle");
+    setLoadProgress(0);
+  }, [ffmpeg]);
+
   return {
     ffmpeg,
     status,
     loadProgress,
     load,
+    terminate,
     isReady: status === "ready",
     isLoading: status === "loading",
     isError: status === "error",
