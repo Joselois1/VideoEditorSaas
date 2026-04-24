@@ -313,7 +313,7 @@ export default function ProjectEditorPage() {
                     <p className="text-[11px] text-zinc-600 mt-3 max-w-md mx-auto leading-relaxed">
                       El render corre entero en tu navegador. Para videos de 1+ minuto puede tardar
                       varios minutos &mdash; mantené la pestaña abierta. {project.output.previewMode
-                        ? "Estás en modo preview (480p, más rápido)."
+                        ? "Estás en modo preview (360p @ 15fps, mucho más rápido)."
                         : "Activá \"Preview rápido\" para iterar mucho más rápido."}
                     </p>
                   )}

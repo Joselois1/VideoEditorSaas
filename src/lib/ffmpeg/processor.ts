@@ -19,6 +19,23 @@ export async function loadFFmpeg(
   ffmpeg: FFmpeg,
   onProgress?: (p: number) => void
 ): Promise<void> {
+  // Diagnostico: confirmar que el navegador permite SharedArrayBuffer (requerido
+  // por el core multi-thread). Si falla, el core MT se cae a single-thread.
+  if (typeof window !== "undefined") {
+    const isolated = (window as { crossOriginIsolated?: boolean }).crossOriginIsolated;
+    const hasSAB = typeof SharedArrayBuffer !== "undefined";
+    // eslint-disable-next-line no-console
+    console.info(
+      `[clipcut] FFmpeg core-mt — crossOriginIsolated=${isolated ?? "?"}, SharedArrayBuffer=${hasSAB}, cores=${navigator.hardwareConcurrency ?? "?"}`,
+    );
+    if (!isolated || !hasSAB) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[clipcut] Multi-thread no disponible — el render sera varias veces mas lento. Verifica los headers COOP/COEP en produccion.",
+      );
+    }
+  }
+
   ffmpeg.on("progress", ({ progress }) => {
     onProgress?.(Math.round(progress * 100));
   });

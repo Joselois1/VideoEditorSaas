@@ -81,6 +81,7 @@ function buildClipVideoFilter(
   vLabel: string,
   targetW: number,
   targetH: number,
+  targetFps: number,
 ): { filter: string; outLabel: string; effectiveDuration: number } {
   const effDur = getEffectiveDuration(clip, asset);
   const parts: string[] = [];
@@ -124,11 +125,11 @@ function buildClipVideoFilter(
     parts.push(`fade=out:st=${st.toFixed(3)}:d=${clip.effects.fadeOut},`);
   }
 
-  // normalizacion: scale + pad + setsar + fps
+  // normalizacion: scale + pad + setsar + fps + pixel format
   parts.push(
     `scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease,`,
     `pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2:color=black,`,
-    `setsar=1,fps=30,format=yuv420p`,
+    `setsar=1,fps=${targetFps},format=yuv420p`,
   );
 
   parts.push(`[${vLabel}]`);
@@ -248,10 +249,12 @@ export async function renderProject(
   }
 
   // ── Resolucion de salida ────────────────────────────────────────────────────
-  // Preview mode override: 480p + CRF 30 para iteracion rapida.
+  // Preview mode override: 360p @ 15fps + CRF 32 — iteracion rapida.
+  // Final mode: la calidad elegida por el usuario @ 30fps + CRF 23.
   const isPreview = project.output.previewMode === true;
-  const effectiveMaxHeight = isPreview ? 480 : project.output.maxHeight;
-  const effectiveCrf = isPreview ? "30" : "23";
+  const effectiveMaxHeight = isPreview ? 360 : project.output.maxHeight;
+  const effectiveCrf = isPreview ? "32" : "23";
+  const effectiveFps = isPreview ? 15 : 30;
 
   const firstVideoAsset = project.videoTrack
     .map((c) => project.assets.find((a) => a.id === c.assetId))
@@ -352,7 +355,7 @@ export async function renderProject(
   // Per-clip video + audio
   project.videoTrack.forEach((clip, i) => {
     const asset = project.assets.find((a) => a.id === clip.assetId)!;
-    const vBuilt = buildClipVideoFilter(clip, asset, i, `v${i}`, targetW, targetH);
+    const vBuilt = buildClipVideoFilter(clip, asset, i, `v${i}`, targetW, targetH, effectiveFps);
     filters.push(vBuilt.filter);
     const hasAudio = asset.type === "video" ? (videoHasAudio.get(asset.id) ?? false) : false;
     filters.push(buildClipAudioFilter(clip, asset, i, `a${i}`, vBuilt.effectiveDuration, hasAudio));
@@ -391,9 +394,11 @@ export async function renderProject(
     const start = Math.max(0, ov.startAt).toFixed(3);
     const end = Math.max(ov.startAt + 0.1, ov.endAt).toFixed(3);
 
-    filters.push(
-      `[${inIdx}:v]format=yuva420p,colorchannelmixer=aa=${alpha},scale=${widthPx}:-1:force_original_aspect_ratio=decrease[ovl${i}]`,
-    );
+    // Si opacidad === 1, no tiene sentido el colorchannelmixer (no modifica nada).
+    const overlayPrep = ov.opacity >= 0.999
+      ? `scale=${widthPx}:-1:force_original_aspect_ratio=decrease`
+      : `format=yuva420p,colorchannelmixer=aa=${alpha},scale=${widthPx}:-1:force_original_aspect_ratio=decrease`;
+    filters.push(`[${inIdx}:v]${overlayPrep}[ovl${i}]`);
     const nextLabel = `vmix${i}`;
     filters.push(
       `[${finalVideoLabel}][ovl${i}]overlay=x=${pos.x}:y=${pos.y}:enable='between(t,${start},${end})'[${nextLabel}]`,

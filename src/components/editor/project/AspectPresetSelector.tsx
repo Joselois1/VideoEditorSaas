@@ -64,7 +64,7 @@ export default function AspectPresetSelector({
           </p>
           <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
             {previewMode
-              ? "Render en 480p — desactivá para la descarga final"
+              ? "Render en 360p @ 15fps — desactivá para la descarga final"
               : "Render en la calidad elegida (más lento)"}
           </p>
         </div>
@@ -103,7 +103,7 @@ export default function AspectPresetSelector({
       {/* Resolucion — se desactiva visualmente cuando preview mode esta ON */}
       <div className={`flex items-center gap-2 transition-opacity ${previewMode ? "opacity-40" : ""}`}>
         <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-          Calidad {previewMode && "(→ 480p)"}
+          Calidad {previewMode && "(→ 360p)"}
         </span>
         <div className="flex gap-1 ml-auto">
           {RESOLUTIONS.map((r) => (
