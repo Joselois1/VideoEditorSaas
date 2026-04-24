@@ -148,13 +148,10 @@ export default function EditorPage() {
             <div className="flex items-center justify-center">
               <Link
                 href="/editor/proyecto"
-                className="group inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors"
               >
                 <span>¿Querés combinar varios clips con música?</span>
-                <span className="font-semibold bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 bg-clip-text text-transparent">
-                  Probá el modo Proyecto
-                </span>
-                <span className="transition-transform group-hover:translate-x-0.5">&rarr;</span>
+                <span className="text-violet-400 font-medium">Probá el modo Proyecto &rarr;</span>
               </Link>
             </div>
           </div>
@@ -162,9 +159,9 @@ export default function EditorPage() {
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
-                <span className="w-1.5 h-8 rounded-full bg-gradient-to-b from-violet-500 via-fuchsia-500 to-orange-500" />
+                <span className="w-0.5 h-8 rounded-full bg-violet-500" />
                 <div>
-                  <h1 className="text-white font-bold text-xl leading-tight">Editor</h1>
+                  <h1 className="text-white font-semibold text-lg leading-tight">Editor</h1>
                   <p className="text-xs text-zinc-500 truncate max-w-[240px] sm:max-w-md">
                     {state.video.name}
                   </p>
@@ -214,18 +211,16 @@ export default function EditorPage() {
 
                 {/* Download bar — aparece cuando hay resultado */}
                 {state.outputUrl && (
-                  <div className="relative rounded-xl p-[1px] bg-gradient-to-r from-emerald-500/40 via-cyan-500/40 to-violet-500/40">
-                    <div className="bg-zinc-900 rounded-[11px] px-4 py-3 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px] shadow-emerald-400/60" />
-                        <p className="text-sm text-zinc-300">
-                          Listo &mdash; descargalo cuando quieras.
-                        </p>
-                      </div>
-                      <Button variant="gradient" onClick={handleDownloadRequest} size="md">
-                        Descargar
-                      </Button>
+                  <div className="bg-zinc-900 border border-emerald-500/20 rounded-xl px-4 py-3 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <p className="text-sm text-zinc-300">
+                        Listo &mdash; descargalo cuando quieras.
+                      </p>
                     </div>
+                    <Button onClick={handleDownloadRequest} size="md">
+                      Descargar
+                    </Button>
                   </div>
                 )}
               </div>
@@ -246,7 +241,6 @@ export default function EditorPage() {
 
                   {state.activeTool && (
                     <Button
-                      variant="gradient"
                       className="w-full mt-2"
                       loading={state.isProcessing}
                       disabled={!isReady || state.isProcessing}

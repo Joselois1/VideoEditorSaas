@@ -20,9 +20,9 @@ interface AssetLibraryProps {
 }
 
 function typeBadge(type: Asset["type"]) {
-  if (type === "video") return { label: "Video",  classes: "bg-violet-500/20 text-violet-300 border-violet-500/30" };
-  if (type === "image") return { label: "Imagen", classes: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30" };
-  return                       { label: "Audio",  classes: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" };
+  if (type === "video") return { label: "Video",  classes: "bg-violet-500/10 text-violet-300 border-violet-500/20" };
+  if (type === "image") return { label: "Imagen", classes: "bg-white/5 text-zinc-300 border-white/10" };
+  return                       { label: "Audio",  classes: "bg-white/5 text-zinc-400 border-white/10" };
 }
 
 function fmtDuration(sec?: number) {
@@ -49,19 +49,15 @@ export default function AssetLibrary({
   };
 
   return (
-    <section className="bg-zinc-900/80 border border-white/5 rounded-2xl p-4 flex flex-col gap-3">
+    <section className="bg-zinc-900/60 border border-white/5 rounded-xl p-4 flex flex-col gap-3">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-500 to-fuchsia-500" />
-          <h2 className="text-sm font-bold text-white">Biblioteca</h2>
+          <h2 className="text-sm font-semibold text-white">Biblioteca</h2>
           <span className="text-xs text-zinc-500">{assets.length} {assets.length === 1 ? "archivo" : "archivos"}</span>
         </div>
         <button
           onClick={() => inputRef.current?.click()}
-          className="text-xs font-medium px-3 py-1.5 rounded-lg
-                     bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white
-                     hover:from-violet-500 hover:to-fuchsia-500
-                     shadow-md shadow-fuchsia-900/30 transition-colors"
+          className="text-xs font-medium px-3 py-1.5 rounded-md bg-violet-600 hover:bg-violet-500 text-white transition-colors"
         >
           + Subir archivos
         </button>
@@ -70,9 +66,9 @@ export default function AssetLibrary({
       {assets.length === 0 ? (
         <div
           onClick={() => inputRef.current?.click()}
-          className="flex flex-col items-center justify-center gap-2 py-10 border border-dashed border-white/10 rounded-xl cursor-pointer hover:border-fuchsia-500/40 hover:bg-white/[0.02] transition-all"
+          className="flex flex-col items-center justify-center gap-2 py-10 border border-dashed border-white/10 rounded-lg cursor-pointer hover:border-white/20 hover:bg-white/[0.02] transition-colors"
         >
-          <svg className="w-10 h-10 text-fuchsia-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-8 h-8 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           <p className="text-sm text-zinc-400">Agregá videos, fotos o música</p>
@@ -87,11 +83,11 @@ export default function AssetLibrary({
             return (
               <div
                 key={asset.id}
-                className="group relative bg-zinc-950 border border-white/5 rounded-xl overflow-hidden hover:border-fuchsia-500/40 transition-all"
+                className="group relative bg-zinc-950 border border-white/5 rounded-lg overflow-hidden hover:border-white/15 transition-colors"
               >
                 {/* Thumb */}
                 <div
-                  className="w-full aspect-video relative bg-zinc-800 flex items-center justify-center cursor-pointer"
+                  className="w-full aspect-video relative bg-zinc-900 flex items-center justify-center cursor-pointer"
                   onClick={() => onAddToTrack(asset)}
                   title={asset.type === "audio" ? "Agregar a musica" : "Agregar al video"}
                 >
@@ -99,11 +95,11 @@ export default function AssetLibrary({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={asset.thumbnailUrl} alt="" className="w-full h-full object-cover" />
                   ) : asset.type === "audio" ? (
-                    <svg className="w-10 h-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <svg className="w-8 h-8 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
                     </svg>
                   ) : (
-                    <svg className="w-10 h-10 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <svg className="w-8 h-8 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
                     </svg>
                   )}
@@ -112,14 +108,14 @@ export default function AssetLibrary({
                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1.5 transition-opacity">
                     <button
                       onClick={(e) => { e.stopPropagation(); onAddToTrack(asset); }}
-                      className="text-[11px] font-semibold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 px-2.5 py-1 rounded-full transition-colors"
+                      className="text-[11px] font-medium text-white bg-violet-600 hover:bg-violet-500 px-2.5 py-1 rounded-md transition-colors"
                     >
                       {asset.type === "audio" ? "+ A música" : "+ Al video"}
                     </button>
                     {showOverlayAction && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onAddAsOverlay!(asset); }}
-                        className="text-[11px] font-semibold text-white bg-gradient-to-r from-fuchsia-600 to-rose-500 hover:from-fuchsia-500 hover:to-rose-400 px-2.5 py-1 rounded-full transition-colors"
+                        className="text-[11px] font-medium text-white bg-zinc-700 hover:bg-zinc-600 px-2.5 py-1 rounded-md border border-white/10 transition-colors"
                         title="Aparece sobre el video principal"
                       >
                         + Overlay
@@ -156,8 +152,8 @@ export default function AssetLibrary({
             );
           })}
           {loading && (
-            <div className="aspect-video rounded-xl border border-dashed border-fuchsia-500/30 flex items-center justify-center">
-              <span className="w-6 h-6 border-2 border-fuchsia-400 border-t-transparent rounded-full animate-spin" />
+            <div className="aspect-video rounded-lg border border-dashed border-white/10 flex items-center justify-center">
+              <span className="w-5 h-5 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
             </div>
           )}
         </div>

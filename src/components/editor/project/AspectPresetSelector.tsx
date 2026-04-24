@@ -40,17 +40,14 @@ export default function AspectPresetSelector({
 }: AspectPresetSelectorProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <span className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-orange-500" />
-        <h3 className="text-xs font-bold text-white uppercase tracking-wider">Formato de salida</h3>
-      </div>
+      <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Formato de salida</h3>
 
       {/* Preview mode toggle — clave para velocidad de iteracion */}
       <label
         className={`
-          flex items-center gap-3 cursor-pointer rounded-lg p-3 transition-all border
+          flex items-center gap-3 cursor-pointer rounded-md p-3 transition-colors border
           ${previewMode
-            ? "bg-gradient-to-r from-fuchsia-500/15 via-violet-500/10 to-transparent border-fuchsia-500/40 shadow-sm shadow-fuchsia-500/10"
+            ? "bg-violet-500/10 border-violet-500/30"
             : "bg-zinc-950 border-white/10 hover:border-white/20"
           }
         `}
@@ -59,28 +56,22 @@ export default function AspectPresetSelector({
           type="checkbox"
           checked={previewMode}
           onChange={(e) => onPreviewModeChange(e.target.checked)}
-          className="w-4 h-4 accent-fuchsia-500 shrink-0"
+          className="w-4 h-4 accent-violet-500 shrink-0"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-white flex items-center gap-1.5">
-            <span>⚡</span>
-            <span>Preview rápido</span>
-            {previewMode && (
-              <span className="text-[9px] uppercase tracking-wider bg-fuchsia-500/30 text-fuchsia-200 px-1.5 py-0.5 rounded">
-                ON
-              </span>
-            )}
+          <p className="text-xs font-medium text-white">
+            Preview rápido
           </p>
           <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
             {previewMode
-              ? "Render en 480p para iterar — desactivá para la descarga final"
-              : "Render en la calidad elegida — más lento"}
+              ? "Render en 480p — desactivá para la descarga final"
+              : "Render en la calidad elegida (más lento)"}
           </p>
         </div>
       </label>
 
       {/* Aspect presets */}
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="grid grid-cols-5 gap-1">
         {PRESETS.map((p) => {
           const active = aspect === p.id;
           return (
@@ -89,16 +80,15 @@ export default function AspectPresetSelector({
               onClick={() => onAspectChange(p.id)}
               title={p.hint}
               className={`
-                group flex flex-col items-center gap-1.5 p-2 rounded-lg text-xs font-medium transition-all
+                flex flex-col items-center gap-1.5 p-2 rounded-md text-xs font-medium transition-colors border
                 ${active
-                  ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md shadow-orange-500/30"
-                  : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  ? "bg-violet-500/15 text-violet-300 border-violet-500/30"
+                  : "bg-white/[0.03] text-zinc-400 border-white/5 hover:bg-white/[0.06] hover:text-white"
                 }
               `}
             >
-              {/* mini proporcion visual */}
               <div
-                className={`border-2 rounded-sm ${active ? "border-white/80" : "border-current opacity-70"}`}
+                className="border rounded-sm border-current opacity-80"
                 style={{
                   width: Math.min(24, p.w * 3),
                   height: Math.min(24, p.h * 3),
@@ -113,7 +103,7 @@ export default function AspectPresetSelector({
       {/* Resolucion — se desactiva visualmente cuando preview mode esta ON */}
       <div className={`flex items-center gap-2 transition-opacity ${previewMode ? "opacity-40" : ""}`}>
         <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-          Calidad {previewMode && "(override 480p)"}
+          Calidad {previewMode && "(→ 480p)"}
         </span>
         <div className="flex gap-1 ml-auto">
           {RESOLUTIONS.map((r) => (
@@ -122,10 +112,10 @@ export default function AspectPresetSelector({
               onClick={() => onHeightChange(r.value)}
               disabled={previewMode}
               className={`
-                text-[11px] px-2.5 py-1 rounded-md font-semibold transition-colors
+                text-[11px] px-2.5 py-1 rounded-md font-medium transition-colors border
                 ${maxHeight === r.value
-                  ? "bg-orange-500 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                  ? "bg-violet-500/15 text-violet-300 border-violet-500/30"
+                  : "bg-white/[0.03] text-zinc-400 border-white/5 hover:bg-white/[0.06] hover:text-white"
                 }
                 disabled:cursor-not-allowed
               `}

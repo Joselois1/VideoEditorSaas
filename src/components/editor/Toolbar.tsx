@@ -14,8 +14,6 @@ interface Tool {
 interface Category {
   id: CategoryId;
   label: string;
-  gradient: string;          // used for active tab + tool hover glow
-  glow: string;              // rgba halo for active tab
   icon: React.ReactNode;
   tools: Tool[];
 }
@@ -78,8 +76,6 @@ const I = {
 const CATEGORIES: Category[] = [
   {
     id: "basic", label: "Básico", icon: I.scissors,
-    gradient: "from-violet-500 to-fuchsia-500",
-    glow: "shadow-fuchsia-500/30",
     tools: [
       { id: "trim",   label: "Cortar",   icon: I.cut },
       { id: "crop",   label: "Recortar", icon: I.crop },
@@ -89,8 +85,6 @@ const CATEGORIES: Category[] = [
   },
   {
     id: "speed", label: "Velocidad", icon: I.bolt,
-    gradient: "from-orange-400 to-pink-500",
-    glow: "shadow-pink-500/30",
     tools: [
       { id: "speed",   label: "Velocidad", icon: I.speed },
       { id: "reverse", label: "Invertir",  icon: I.reverse },
@@ -100,8 +94,6 @@ const CATEGORIES: Category[] = [
   },
   {
     id: "audio", label: "Audio", icon: I.wave,
-    gradient: "from-cyan-400 to-violet-500",
-    glow: "shadow-cyan-500/30",
     tools: [
       { id: "audio",  label: "Silenciar / Extraer", icon: I.mute },
       { id: "volume", label: "Volumen",             icon: I.volume },
@@ -110,8 +102,6 @@ const CATEGORIES: Category[] = [
   },
   {
     id: "effects", label: "Efectos", icon: I.sparkles,
-    gradient: "from-fuchsia-500 to-rose-500",
-    glow: "shadow-rose-500/30",
     tools: [
       { id: "color", label: "Color",       icon: I.color },
       { id: "fade",  label: "Fade in/out", icon: I.fade },
@@ -119,16 +109,12 @@ const CATEGORIES: Category[] = [
   },
   {
     id: "elements", label: "Elementos", icon: I.text,
-    gradient: "from-emerald-400 to-cyan-500",
-    glow: "shadow-emerald-500/30",
     tools: [
       { id: "text", label: "Texto", icon: I.textTool },
     ],
   },
   {
     id: "export", label: "Exportar", icon: I.download,
-    gradient: "from-amber-400 to-orange-500",
-    glow: "shadow-orange-500/30",
     tools: [
       { id: "compress",      label: "Comprimir", icon: I.compress },
       { id: "format",        label: "Formato",   icon: I.format },
@@ -165,7 +151,7 @@ export default function Toolbar({ activeTool, onToolSelect }: ToolbarProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Tabs de categorias */}
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-3 gap-1">
         {CATEGORIES.map((cat) => {
           const isOpen = cat.id === openCategory;
           return (
@@ -173,15 +159,15 @@ export default function Toolbar({ activeTool, onToolSelect }: ToolbarProps) {
               key={cat.id}
               onClick={() => setOpenCategory(cat.id)}
               className={`
-                group relative flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl
-                text-[11px] font-semibold transition-all
+                flex flex-col items-center gap-1 px-2 py-2 rounded-md
+                text-[11px] font-medium transition-colors
                 ${isOpen
-                  ? `bg-gradient-to-br ${cat.gradient} text-white shadow-lg ${cat.glow}`
-                  : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  ? "bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                  : "bg-transparent text-zinc-500 border border-transparent hover:bg-white/[0.04] hover:text-zinc-300"
                 }
               `}
             >
-              <span className="w-5 h-5">{cat.icon}</span>
+              <span className="w-4 h-4">{cat.icon}</span>
               <span>{cat.label}</span>
             </button>
           );
@@ -189,7 +175,7 @@ export default function Toolbar({ activeTool, onToolSelect }: ToolbarProps) {
       </div>
 
       {/* Herramientas de la categoria activa */}
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1">
         {current.tools.map((tool) => {
           const isActive = activeTool === tool.id;
           return (
@@ -197,26 +183,22 @@ export default function Toolbar({ activeTool, onToolSelect }: ToolbarProps) {
               key={tool.id}
               onClick={() => onToolSelect(tool.id)}
               className={`
-                group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                transition-all border
+                flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors
                 ${isActive
-                  ? `bg-gradient-to-r ${current.gradient} text-white border-transparent shadow-md ${current.glow}`
-                  : "bg-zinc-800/40 text-zinc-300 border-white/5 hover:border-white/20 hover:bg-zinc-800 hover:text-white"
+                  ? "bg-violet-500/15 text-white border border-violet-500/30"
+                  : "bg-transparent text-zinc-400 border border-transparent hover:bg-white/[0.04] hover:text-white"
                 }
               `}
             >
               <span className={`
-                w-8 h-8 shrink-0 rounded-lg flex items-center justify-center transition-all
-                ${isActive
-                  ? "bg-white/20"
-                  : `bg-gradient-to-br ${current.gradient} text-white group-hover:scale-110`
-                }
+                w-6 h-6 shrink-0 flex items-center justify-center
+                ${isActive ? "text-violet-300" : "text-zinc-500"}
               `}>
                 <span className="w-4 h-4">{tool.icon}</span>
               </span>
               <span className="flex-1 text-left">{tool.label}</span>
               {isActive && (
-                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                <span className="w-1 h-1 rounded-full bg-violet-400" />
               )}
             </button>
           );

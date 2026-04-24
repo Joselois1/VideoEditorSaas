@@ -140,11 +140,11 @@ export default function ProjectEditorPage() {
         {/* Top bar */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <span className="w-1.5 h-8 rounded-full bg-gradient-to-b from-violet-500 via-fuchsia-500 to-orange-500" />
+            <span className="w-0.5 h-8 rounded-full bg-violet-500" />
             <div>
-              <h1 className="text-white font-bold text-xl leading-tight flex items-center gap-2">
+              <h1 className="text-white font-semibold text-lg leading-tight flex items-center gap-2">
                 Proyecto
-                <span className="text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-300">
+                <span className="text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400">
                   Beta
                 </span>
               </h1>
@@ -159,7 +159,6 @@ export default function ProjectEditorPage() {
               <Button variant="ghost" size="sm">&larr; Editor rápido</Button>
             </Link>
             <Button
-              variant="gradient"
               size="md"
               loading={isRendering}
               disabled={!hasVideo || isRendering}
@@ -202,28 +201,26 @@ export default function ProjectEditorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 items-start">
           <div className="flex flex-col gap-5 min-w-0">
             {/* Preview */}
-            <section className="bg-zinc-900/80 border border-white/5 rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-fuchsia-500/5 to-orange-500/5 pointer-events-none" />
-
+            <section className="bg-zinc-900/60 border border-white/5 rounded-xl p-4 flex flex-col gap-3">
               {result ? (
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px] shadow-emerald-400/60" />
-                    <p className="text-sm font-semibold text-white">Render listo</p>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <p className="text-sm font-medium text-white">Render listo</p>
                     {result.quality === "preview" ? (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
-                        ⚡ Preview {result.height}p
+                      <span className="text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 border border-white/10">
+                        Preview {result.height}p
                       </span>
                     ) : (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        Calidad final {result.height}p
+                      <span className="text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        Final {result.height}p
                       </span>
                     )}
                     <span className="text-xs text-zinc-500 ml-auto">
                       {formatFileSize(result.size)} • {result.duration.toFixed(1)}s
                     </span>
                   </div>
-                  <div className="bg-black rounded-xl overflow-hidden aspect-video w-full">
+                  <div className="bg-black rounded-md overflow-hidden aspect-video w-full border border-white/5">
                     <video
                       src={result.url}
                       controls
@@ -233,16 +230,16 @@ export default function ProjectEditorPage() {
 
                   {/* Aviso de preview — ofrece re-renderizar en alta calidad */}
                   {result.quality === "preview" && (
-                    <div className="flex items-center justify-between gap-3 text-xs bg-fuchsia-500/5 border border-fuchsia-500/20 rounded-lg px-3 py-2">
-                      <p className="text-zinc-300">
-                        Este preview es de baja calidad. Desactivá <strong className="text-fuchsia-300">Preview rápido</strong> y re-renderizá para la descarga final.
+                    <div className="flex items-center justify-between gap-3 text-xs bg-white/[0.03] border border-white/10 rounded-md px-3 py-2">
+                      <p className="text-zinc-400">
+                        Este preview es de baja calidad. Desactivá <span className="text-violet-300">Preview rápido</span> y re-renderizá para la descarga final.
                       </p>
                       <button
                         onClick={() => {
                           setPreviewMode(false);
                           clearResult();
                         }}
-                        className="shrink-0 text-fuchsia-300 hover:text-white font-semibold whitespace-nowrap"
+                        className="shrink-0 text-violet-300 hover:text-white font-medium whitespace-nowrap"
                       >
                         Apagar preview →
                       </button>
@@ -253,20 +250,20 @@ export default function ProjectEditorPage() {
                     <Button variant="ghost" size="sm" onClick={clearResult}>
                       &larr; Seguir editando
                     </Button>
-                    <Button variant="gradient" size="md" onClick={handleDownloadClick}>
+                    <Button size="md" onClick={handleDownloadClick}>
                       Descargar MP4
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="relative text-center py-10">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-orange-500 flex items-center justify-center mb-3 shadow-lg shadow-fuchsia-500/30">
-                    <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <div className="text-center py-10">
+                  <div className="w-12 h-12 mx-auto rounded-md bg-white/[0.03] border border-white/10 flex items-center justify-center mb-3">
+                    <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-semibold text-white">Preview del proyecto</p>
+                  <p className="text-sm font-medium text-white">Preview del proyecto</p>
                   <p className="text-xs text-zinc-500 mt-1">
                     {hasVideo
                       ? "Apretá Renderizar para generar el resultado."
@@ -286,12 +283,9 @@ export default function ProjectEditorPage() {
             />
 
             {/* Timelines */}
-            <section className="bg-zinc-900/80 border border-white/5 rounded-2xl p-4 flex flex-col gap-4">
+            <section className="bg-zinc-900/60 border border-white/5 rounded-xl p-4 flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-1 h-5 rounded-full bg-gradient-to-b from-fuchsia-500 to-orange-500" />
-                  <h2 className="text-sm font-bold text-white">Timeline</h2>
-                </div>
+                <h2 className="text-sm font-semibold text-white">Timeline</h2>
                 <span className="text-xs text-zinc-500">
                   Duración total: <span className="text-zinc-300 font-medium">{formatDuration(totalDuration)}</span>
                 </span>
@@ -344,19 +338,19 @@ export default function ProjectEditorPage() {
                 onRemove={() => removeVideoClip(selectedClip.id)}
               />
             ) : (
-              <div className="bg-zinc-900/80 border border-dashed border-white/10 rounded-2xl p-5 text-center">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-orange-500/20 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <div className="bg-zinc-900/40 border border-dashed border-white/10 rounded-xl p-5 text-center">
+                <div className="w-9 h-9 mx-auto mb-2 rounded-md bg-white/[0.03] border border-white/10 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </div>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-zinc-500">
                   Seleccioná un clip o sobreimpresión<br />para editar sus propiedades
                 </p>
               </div>
             )}
 
-            <div className="bg-zinc-900/80 border border-white/5 rounded-2xl p-4">
+            <div className="bg-zinc-900/60 border border-white/5 rounded-xl p-4">
               <AspectPresetSelector
                 aspect={project.output.aspect}
                 maxHeight={project.output.maxHeight}

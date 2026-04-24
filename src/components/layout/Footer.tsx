@@ -1,14 +1,12 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-zinc-950 py-8 mt-auto">
+    <footer className="border-t border-white/5 bg-zinc-950 py-8 mt-auto">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-zinc-500 text-sm">
         <p>
           &copy; {new Date().getFullYear()}{" "}
-          <span className="font-semibold">
+          <span className="font-medium">
             <span className="text-white">clip</span>
-            <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 bg-clip-text text-transparent">
-              cut
-            </span>
+            <span className="text-violet-400">cut</span>
           </span>
           . Todos los derechos reservados.
         </p>

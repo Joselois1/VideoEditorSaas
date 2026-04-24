@@ -45,19 +45,19 @@ export default function OverlayEffectsPanel({
 }: OverlayEffectsPanelProps) {
 
   return (
-    <aside className="bg-zinc-900/90 border border-fuchsia-500/20 rounded-2xl p-4 flex flex-col gap-4 shadow-xl shadow-fuchsia-900/20">
+    <aside className="bg-zinc-900/60 border border-white/10 rounded-xl p-4 flex flex-col gap-4">
       <header className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
+          <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 bg-white/5 text-zinc-400 border border-white/10">
             Sobreimpresión
           </span>
-          <p className="text-sm font-semibold text-white truncate" title={asset.name}>
+          <p className="text-sm font-medium text-white truncate" title={asset.name}>
             {asset.name}
           </p>
         </div>
         <button
           onClick={onClose}
-          className="shrink-0 w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-sm flex items-center justify-center transition-colors"
+          className="shrink-0 w-6 h-6 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-white text-sm flex items-center justify-center transition-colors"
           title="Cerrar"
         >
           ×
@@ -66,7 +66,7 @@ export default function OverlayEffectsPanel({
 
       {/* Preview miniatura */}
       {asset.thumbnailUrl && (
-        <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+        <div className="w-full aspect-video bg-black rounded-md overflow-hidden border border-white/5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={asset.thumbnailUrl} alt="" className="w-full h-full object-cover" />
         </div>
@@ -74,7 +74,7 @@ export default function OverlayEffectsPanel({
 
       {/* Posición */}
       <Row label="Posición">
-        <div className="grid grid-cols-3 gap-1.5 aspect-[3/2] w-full">
+        <div className="grid grid-cols-3 gap-1 aspect-[3/2] w-full">
           {POSITIONS.map((pos) => {
             const active = clip.position === pos.id;
             return (
@@ -83,14 +83,14 @@ export default function OverlayEffectsPanel({
                 onClick={() => onUpdate({ position: pos.id })}
                 title={pos.id}
                 className={`
-                  flex items-center justify-center rounded-lg transition-all
+                  flex items-center justify-center rounded-md transition-colors border
                   ${active
-                    ? "bg-gradient-to-br from-fuchsia-500 to-rose-500 shadow-md shadow-fuchsia-500/30"
-                    : "bg-zinc-800/60 hover:bg-zinc-800"
+                    ? "bg-violet-500/15 border-violet-500/40"
+                    : "bg-white/[0.02] border-white/5 hover:bg-white/[0.05]"
                   }
                 `}
               >
-                <span className={`w-2.5 h-2.5 rounded-full ${active ? "bg-white" : "bg-zinc-500"}`} />
+                <span className={`w-2 h-2 rounded-full ${active ? "bg-violet-400" : "bg-zinc-600"}`} />
               </button>
             );
           })}
@@ -106,14 +106,14 @@ export default function OverlayEffectsPanel({
               onClick={() => onUpdate({ size: s.id })}
               title={s.hint}
               className={`
-                flex flex-col items-center gap-0.5 py-2 rounded-lg transition-all
+                flex flex-col items-center gap-0.5 py-2 rounded-md transition-colors border
                 ${clip.size === s.id
-                  ? "bg-gradient-to-br from-fuchsia-500 to-rose-500 text-white shadow-md shadow-fuchsia-500/30"
-                  : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  ? "bg-violet-500/15 text-violet-300 border-violet-500/30"
+                  : "bg-white/[0.03] text-zinc-400 border-white/5 hover:bg-white/[0.06] hover:text-white"
                 }
               `}
             >
-              <span className="text-xs font-bold">{s.label}</span>
+              <span className="text-xs font-semibold">{s.label}</span>
               <span className="text-[9px] opacity-80">{s.hint}</span>
             </button>
           ))}
@@ -132,7 +132,7 @@ export default function OverlayEffectsPanel({
                 const v = Math.max(0, Math.min(clip.endAt - 0.1, parseFloat(e.target.value) || 0));
                 onUpdate({ startAt: v });
               }}
-              className="bg-zinc-950 border border-white/10 rounded-md px-2 py-1 text-xs text-white focus:border-fuchsia-500 outline-none"
+              className="bg-zinc-950 border border-white/10 rounded-md px-2 py-1 text-xs text-white focus:border-violet-500 outline-none"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -144,7 +144,7 @@ export default function OverlayEffectsPanel({
                 const v = Math.max(clip.startAt + 0.1, Math.min(timelineDuration || 999, parseFloat(e.target.value) || 0));
                 onUpdate({ endAt: v });
               }}
-              className="bg-zinc-950 border border-white/10 rounded-md px-2 py-1 text-xs text-white focus:border-fuchsia-500 outline-none"
+              className="bg-zinc-950 border border-white/10 rounded-md px-2 py-1 text-xs text-white focus:border-violet-500 outline-none"
             />
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function OverlayEffectsPanel({
             min={0.1} max={1} step={0.05}
             value={clip.opacity}
             onChange={(e) => onUpdate({ opacity: parseFloat(e.target.value) })}
-            className="flex-1 accent-fuchsia-400"
+            className="flex-1 accent-violet-500"
           />
           <span className="text-xs text-zinc-300 w-10 tabular-nums text-right">
             {Math.round(clip.opacity * 100)}%

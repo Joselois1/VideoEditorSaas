@@ -14,9 +14,9 @@ export default function ProgressBar({ value, label, className = "" }: ProgressBa
           <span>{clamped}%</span>
         </div>
       )}
-      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-500 rounded-full transition-all duration-200 shadow-[0_0_10px] shadow-fuchsia-500/40"
+          className="h-full bg-violet-500 rounded-full transition-all duration-200"
           style={{ width: `${clamped}%` }}
         />
       </div>

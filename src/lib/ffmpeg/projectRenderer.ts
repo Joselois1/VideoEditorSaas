@@ -141,13 +141,14 @@ function buildClipAudioFilter(
   inputIndex: number,
   aLabel: string,
   effectiveDuration: number,
+  hasAudio: boolean,
 ): string {
-  // Si es imagen o el clip esta muteado o el video no tiene audio,
-  // generamos audio silencioso del mismo largo que el video.
+  // Si es imagen, el clip esta muteado, o el video no tiene audio,
+  // generamos audio silencioso del mismo largo.
   const muted = clip.effects.mute === true;
   const isImage = asset.type === "image";
 
-  if (isImage || muted) {
+  if (isImage || muted || !hasAudio) {
     return `anullsrc=r=44100:cl=stereo,atrim=duration=${effectiveDuration.toFixed(3)},asetpts=PTS-STARTPTS[${aLabel}]`;
   }
 
@@ -224,6 +225,20 @@ export interface RenderResult {
   height: number;
 }
 
+// Probe si un archivo tiene pista de audio. Ejecuta `-i file` y parsea el
+// stderr de ffmpeg buscando el marcador "Audio:".
+async function probeHasAudio(ffmpeg: FFmpeg, inputName: string): Promise<boolean> {
+  let output = "";
+  const onLog = ({ message }: { message: string }) => { output += message + "\n"; };
+  ffmpeg.on("log", onLog);
+  try {
+    await ffmpeg.exec(["-i", inputName]).catch(() => {});
+  } finally {
+    ffmpeg.off("log", onLog);
+  }
+  return output.includes("Audio:");
+}
+
 export async function renderProject(
   ffmpeg: FFmpeg,
   project: Project,
@@ -281,6 +296,16 @@ export async function renderProject(
     filesToClean.push(name);
   }
 
+  // Probe de audio para cada asset de video referenciado (una vez por asset).
+  // Los videos sin pista de audio requieren fallback a audio silencioso para
+  // que concat=v=1:a=1 funcione.
+  const videoHasAudio = new Map<string, boolean>();
+  for (const [assetId] of assetFiles) {
+    const asset = project.assets.find((a) => a.id === assetId);
+    if (!asset || asset.type !== "video") continue;
+    videoHasAudio.set(assetId, await probeHasAudio(ffmpeg, assetFiles.get(assetId)!));
+  }
+
   // Inputs de la video track (imagenes con -loop 1 -t)
   for (const clip of project.videoTrack) {
     const asset = project.assets.find((a) => a.id === clip.assetId);
@@ -329,7 +354,8 @@ export async function renderProject(
     const asset = project.assets.find((a) => a.id === clip.assetId)!;
     const vBuilt = buildClipVideoFilter(clip, asset, i, `v${i}`, targetW, targetH);
     filters.push(vBuilt.filter);
-    filters.push(buildClipAudioFilter(clip, asset, i, `a${i}`, vBuilt.effectiveDuration));
+    const hasAudio = asset.type === "video" ? (videoHasAudio.get(asset.id) ?? false) : false;
+    filters.push(buildClipAudioFilter(clip, asset, i, `a${i}`, vBuilt.effectiveDuration, hasAudio));
   });
 
   // Concat
@@ -379,22 +405,41 @@ export async function renderProject(
   const outputName = "project_output.mp4";
   filesToClean.push(outputName);
 
+  // Capturamos stderr de ffmpeg para poder reportar el error real si falla.
+  let ffmpegLog = "";
+  const onLog = ({ message }: { message: string }) => {
+    ffmpegLog += message + "\n";
+    // Conservar solo las ultimas ~40 lineas — el stderr es largo.
+    if (ffmpegLog.length > 8000) ffmpegLog = ffmpegLog.slice(-8000);
+  };
+  ffmpeg.on("log", onLog);
+
   try {
-    await ffmpeg.exec([
-      ...inputArgs,
-      "-filter_complex", filters.join(";"),
-      "-map", `[${finalVideoLabel}]`,
-      "-map", `[${finalAudioLabel}]`,
-      "-c:v", "libx264",
-      "-preset", "ultrafast",
-      "-tune", "fastdecode",
-      "-crf", effectiveCrf,
-      "-pix_fmt", "yuv420p",
-      "-c:a", "aac",
-      "-b:a", isPreview ? "96k" : "128k",
-      "-shortest",
-      outputName,
-    ]);
+    try {
+      await ffmpeg.exec([
+        ...inputArgs,
+        "-filter_complex", filters.join(";"),
+        "-map", `[${finalVideoLabel}]`,
+        "-map", `[${finalAudioLabel}]`,
+        "-c:v", "libx264",
+        "-preset", "ultrafast",
+        "-tune", "fastdecode",
+        "-crf", effectiveCrf,
+        "-pix_fmt", "yuv420p",
+        "-c:a", "aac",
+        "-b:a", isPreview ? "96k" : "128k",
+        "-shortest",
+        outputName,
+      ]);
+    } catch (execErr) {
+      // Extraer la ultima linea de "Error" / "failed" del stderr para el usuario.
+      const lines = ffmpegLog.split("\n");
+      const errorLine = lines.reverse().find(
+        (l) => /error|failed|invalid|unable|no such/i.test(l) && l.trim().length > 0,
+      );
+      const reason = errorLine ? errorLine.trim() : (execErr instanceof Error ? execErr.message : "Error desconocido");
+      throw new Error(`FFmpeg falló durante el render: ${reason}`);
+    }
 
     const data = await ffmpeg.readFile(outputName);
     const buffer = data instanceof Uint8Array ? data.buffer.slice(0) : data;
@@ -418,6 +463,7 @@ export async function renderProject(
       height: targetH,
     };
   } finally {
+    ffmpeg.off("log", onLog);
     for (const f of filesToClean) {
       try { await ffmpeg.deleteFile(f); } catch { /* ignore */ }
     }

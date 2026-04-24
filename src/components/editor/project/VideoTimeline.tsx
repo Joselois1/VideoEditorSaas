@@ -69,11 +69,11 @@ function SortableClip({ clip, asset, selected, onSelect, onRemove }: SortableCli
       ref={setNodeRef}
       style={style}
       className={`
-        group relative shrink-0 w-40 h-24 rounded-lg overflow-hidden cursor-grab active:cursor-grabbing
-        border-2 transition-all
+        group relative shrink-0 w-40 h-24 rounded-md overflow-hidden cursor-grab active:cursor-grabbing
+        border transition-colors
         ${selected
-          ? "border-fuchsia-500 shadow-lg shadow-fuchsia-500/30 scale-[1.03]"
-          : "border-white/10 hover:border-white/30"
+          ? "border-violet-500"
+          : "border-white/10 hover:border-white/20"
         }
         ${isDragging ? "z-50" : ""}
       `}
@@ -105,10 +105,7 @@ function SortableClip({ clip, asset, selected, onSelect, onRemove }: SortableCli
         </div>
 
         {/* Badge tipo (superior izquierda) */}
-        <span className={`
-          absolute top-1 left-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded
-          ${asset.type === "image" ? "bg-fuchsia-500/80 text-white" : "bg-violet-500/80 text-white"}
-        `}>
+        <span className="absolute top-1 left-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-black/60 text-zinc-200 backdrop-blur-sm">
           {asset.type === "image" ? "IMG" : "VID"}
         </span>
       </button>
@@ -147,21 +144,19 @@ export default function VideoTimeline({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <span className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0">
-          <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.5-2A1 1 0 0121 9v6a1 1 0 01-1.5.9L15 14M4 7a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7z" />
-          </svg>
-        </span>
-        <h3 className="text-xs font-bold text-white uppercase tracking-wider">Video / Fotos</h3>
+        <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.5-2A1 1 0 0121 9v6a1 1 0 01-1.5.9L15 14M4 7a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7z" />
+        </svg>
+        <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Video / Fotos</h3>
         <span className="text-xs text-zinc-500">
           {clips.length} {clips.length === 1 ? "clip" : "clips"}
           {totalDuration > 0 && ` • ${fmtSecs(totalDuration)}`}
         </span>
       </div>
 
-      <div className="relative bg-zinc-950/80 border border-white/5 rounded-xl p-3 overflow-x-auto">
+      <div className="relative bg-zinc-950/60 border border-white/5 rounded-lg p-3 overflow-x-auto">
         {clips.length === 0 ? (
-          <div className="flex items-center justify-center py-6 text-xs text-zinc-500 border border-dashed border-white/10 rounded-lg">
+          <div className="flex items-center justify-center py-6 text-xs text-zinc-500 border border-dashed border-white/10 rounded-md">
             Click en un archivo de la biblioteca para agregarlo aqui
           </div>
         ) : (
