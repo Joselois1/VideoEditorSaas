@@ -40,6 +40,9 @@ export default function ProjectEditorPage() {
   const [isRendering, setIsRendering] = useState(false);
   const [renderProgress, setRenderProgress] = useState(0);
   const [renderStage, setRenderStage] = useState<"preparing" | "processing">("preparing");
+  const [renderElapsed, setRenderElapsed] = useState(0);    // segundos transcurridos
+  const [renderEta, setRenderEta] = useState<number | null>(null);
+  const [lastRenderMs, setLastRenderMs] = useState<number | null>(null);
   const [result, setResult] = useState<RenderResult | null>(null);
 
   // Precarga FFmpeg apenas entra a la pagina — ~30 MB de descarga que sucede
@@ -72,22 +75,44 @@ export default function ProjectEditorPage() {
     setIsRendering(true);
     setRenderProgress(0);
     setRenderStage("preparing");
+    setRenderElapsed(0);
+    setRenderEta(null);
+    setLastRenderMs(null);
 
-    // conectamos progress de ffmpeg
+    const startedAt = Date.now();
+
+    // Actualiza "elapsed" cada segundo mientras dure el render.
+    const elapsedTimer = setInterval(() => {
+      setRenderElapsed(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+
+    // conectamos progress de ffmpeg y calculamos ETA
     const onProgress = ({ progress }: { progress: number }) => {
       setRenderStage("processing");
-      setRenderProgress(Math.round(progress * 100));
+      const pct = Math.max(0, Math.min(100, Math.round(progress * 100)));
+      setRenderProgress(pct);
+
+      // ETA basado en progreso lineal; solo confiable despues del ~3%
+      if (progress > 0.03) {
+        const elapsed = (Date.now() - startedAt) / 1000;
+        const totalEstimate = elapsed / progress;
+        const remaining = Math.max(0, totalEstimate - elapsed);
+        setRenderEta(remaining);
+      }
     };
     ffmpeg.on("progress", onProgress);
 
     try {
       const r = await renderProject(ffmpeg, project);
+      setLastRenderMs(Date.now() - startedAt);
       setResult(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al renderizar el proyecto.");
     } finally {
+      clearInterval(elapsedTimer);
       ffmpeg.off("progress", onProgress);
       setIsRendering(false);
+      setRenderEta(null);
     }
   }, [ffmpeg, project, setError, clearResult]);
 
@@ -185,16 +210,28 @@ export default function ProjectEditorPage() {
 
         {/* Progress */}
         {(isLoading || isRendering) && (
-          <ProgressBar
-            value={isRendering ? renderProgress : 0}
-            label={
-              !isRendering
-                ? "Cargando motor de video..."
-                : renderStage === "preparing"
-                ? "Preparando archivos..."
-                : "Procesando video..."
-            }
-          />
+          <div className="flex flex-col gap-1">
+            <ProgressBar
+              value={isRendering ? renderProgress : 0}
+              label={
+                !isRendering
+                  ? "Cargando motor de video..."
+                  : renderStage === "preparing"
+                  ? "Preparando archivos..."
+                  : "Procesando video..."
+              }
+            />
+            {isRendering && (
+              <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                <span>Transcurrido: {formatDuration(renderElapsed)}</span>
+                {renderEta !== null ? (
+                  <span>Faltan aprox. {formatDuration(Math.round(renderEta))}</span>
+                ) : (
+                  <span>Estimando tiempo...</span>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Layout principal: preview+biblioteca+timeline (izq) + panel (der) */}
@@ -218,6 +255,9 @@ export default function ProjectEditorPage() {
                     )}
                     <span className="text-xs text-zinc-500 ml-auto">
                       {formatFileSize(result.size)} • {result.duration.toFixed(1)}s
+                      {lastRenderMs !== null && (
+                        <> • renderizado en {formatDuration(Math.round(lastRenderMs / 1000))}</>
+                      )}
                     </span>
                   </div>
                   <div className="bg-black rounded-md overflow-hidden aspect-video w-full border border-white/5">
@@ -269,6 +309,14 @@ export default function ProjectEditorPage() {
                       ? "Apretá Renderizar para generar el resultado."
                       : "Agregá clips a la timeline para empezar."}
                   </p>
+                  {hasVideo && (
+                    <p className="text-[11px] text-zinc-600 mt-3 max-w-md mx-auto leading-relaxed">
+                      El render corre entero en tu navegador. Para videos de 1+ minuto puede tardar
+                      varios minutos &mdash; mantené la pestaña abierta. {project.output.previewMode
+                        ? "Estás en modo preview (480p, más rápido)."
+                        : "Activá \"Preview rápido\" para iterar mucho más rápido."}
+                    </p>
+                  )}
                 </div>
               )}
             </section>
